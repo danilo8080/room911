@@ -20,8 +20,11 @@
         <h1>Acceso al 911</h1>
         <form method="POST">
             @csrf
+            
             <input type="text" name="user" placeholder="Username" required="required" />
             <input type="password" name="password" placeholder="Password" required="required" />
+            {!! $errors->first('user','<span class="help-block">:message</span><br>') !!}
+            <br>
             <button type="submit" class="btn btn-primary btn-block btn-large">Login.</button>
         </form>
     </div>

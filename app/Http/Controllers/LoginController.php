@@ -8,7 +8,14 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     public function login(){
-        return view('login\login');
+
+        if(Auth::check()){
+            return redirect()->route('user.index');
+        }else{
+            
+            return view('login\login');
+        }
+        
     }
 
     public function authenticate(Request $request)
@@ -20,13 +27,18 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
-            return redirect()->intended('index');
+            return redirect()->route('user.index');
         }
+
 
         return back()->withErrors([
             'user' => 'The provided credentials do not match our records.',
         ]);
+    }
+
+    public function Logout() {
+        Auth::logout();
+        return redirect()->route('login');
     }
 
 

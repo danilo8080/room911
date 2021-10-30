@@ -19,7 +19,8 @@ class CreateEmployedsTable extends Migration
             $table->string('lastName');
             $table->string('middleName');
             $table->string('firstName');
-            $table->boolean('Access');
+            $table->boolean('access');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
