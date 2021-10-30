@@ -12,4 +12,10 @@ class Employed extends Model
     use SoftDeletes;
 
     protected $primaryKey = "employedID";
+
+
+    public function records()
+    {
+        return $this->hasMany(Record::class,'employedID');
+    }
 }

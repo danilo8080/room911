@@ -31,3 +31,13 @@ Route::PUT('updateEmployed/{id}','App\Http\Controllers\DashboardController@updat
 
 Route::DELETE('deleteEmployed/{id}','App\Http\Controllers\DashboardController@delete')->name('employed.delete');
 
+Route::PUT('access/{id}','App\Http\Controllers\DashboardController@access')->name('employed.access');
+
+Route::get('/logout','App\Http\Controllers\LoginController@logout')->name('logout');
+
+Route::get('/employedLogin','App\Http\Controllers\loginEmployedController@login')->name('employed.login');
+
+Route::POST('/employedLogin','App\Http\Controllers\loginEmployedController@authenticate')->name('employed.authenticate');
+
+Route::get('/employedDashboard','App\Http\Controllers\EmployedController@dashboard')->name('employed.dashboard');
+

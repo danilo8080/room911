@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,17 +11,16 @@
    <link rel="stylesheet" href="{{asset('css/main.css')}}">     
 
 
-    <title>Access 911</title>
+    <title>Acceso 911</title>
 
 </head>
 <body>
     <div class="login">
-        <h1>Access to 911 admin</h1>
-        <form method="POST">
+        <h1>Access to 911</h1>
+        <form method="POST" action="{{route('employed.login')}}">
             @csrf
             
-            <input type="text" name="user" placeholder="Username" required="required" />
-            <input type="password" name="password" placeholder="Password" required="required" />
+            <input type="text" name="user" placeholder="ID" required="required" />
             {!! $errors->first('user','<span class="help-block">:message</span><br>') !!}
             <br>
             <button type="submit" class="btn btn-primary btn-block btn-large">Login.</button>
@@ -30,7 +28,3 @@
     </div>
 </body>
 </html>
-
-
-
-

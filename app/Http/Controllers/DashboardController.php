@@ -8,6 +8,7 @@ use App\Models\Employed;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -23,8 +24,26 @@ class DashboardController extends Controller
 
     }
 
-    public function fetchemployed(){
-        $employeds = Employed::all();
+    public function fetchemployed(Request $request){
+        $searchID = $request->input('searchID');
+        $searchDepartment = $request->input('searchDepartment');
+        $searchName = $request->input('searchName');
+        $searchLastName = $request->input('searchLastName');
+        
+        
+        $employeds = DB::table('employeds')->where('deleted_at',null)
+                                            ->where('employedID','like',"$searchID%")
+                                            ->where('lastName','like',"$searchLastName%")
+                                            ->when($searchDepartment, function ($query, $searchDepartment) {
+                                                $query->where('department','like',"%$searchDepartment%");
+                                            })
+                                            ->when($searchName, function ($query, $searchName) {
+                                                    $query->where('firstName','like',"$searchName%")
+                                                            ->orWhere('middleName','like',"$searchName%");
+                                            })->get();
+
+        
+        
 
         return response()->json([
             'employeds' => $employeds,
@@ -32,12 +51,14 @@ class DashboardController extends Controller
     }
 
     public function store(Request $request){
+        
         $validator = Validator::make($request->all(),[
-            'employedID' => 'required|integer',
+            'employedID' => 'required|integer|unique:employeds',
             'department' => 'required|max:191',
             'lastName' => 'required|max:191',
             'middleName' => 'required|max:191',
             'firstName' => 'required|max:191',
+            'access' => 'required|boolean',
             
         ]);
 
@@ -54,7 +75,7 @@ class DashboardController extends Controller
             $employed->lastName = $request->input('lastName');
             $employed->middleName = $request->input('middleName');
             $employed->firstName = $request->input('firstName');
-            $employed->Access = 1;
+            $employed->Access = $request->input('access');;
             $employed->save();
             return response()->json([
                 'status' => 200,
@@ -105,7 +126,6 @@ class DashboardController extends Controller
                 $employed->lastName = $request->input('lastName');
                 $employed->middleName = $request->input('middleName');
                 $employed->firstName = $request->input('firstName');
-                $employed->Access = 1;
                 $employed->update();
                 
                 return response()->json([
@@ -142,6 +162,21 @@ class DashboardController extends Controller
                 'message' => 'Employed not found',
             ]);
         }
+    }
+
+    public function access($id)
+    {
+        $employed = Employed::where('employedID','=',$id)->first();
+        if($employed->access){
+            $employed->access = 0;
+        }else{
+            $employed->access = 1;
+        }
+        $employed->update();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Employed Update Successfully',
+        ]);
     }
 
     
