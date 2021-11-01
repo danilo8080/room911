@@ -151,6 +151,57 @@
 </div>
 <!-- Modal access employed end-->
 
+<!-- Modal record employed-->
+<div class="modal fade" id="recordEmployedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Record employed</h5>
+                <button type="button" class="btn-close close_employed" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <input type="hidden" id="recordEmployedId" class="employedId form-control">
+            <div class="modal-body">
+                <h4 class="fullName"></h4>
+                <br>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="">From: </label>
+                            <input type="date" class="start">
+                        </div>
+                        <div class="form-group">
+                            <label for="">To: </label>
+                            <input type="date" class="end">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="download btn btn-danger"><i class="far fa-file-pdf"></i></button>
+                    </div>
+
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="employedsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Hour</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tbodyRecord">
+                        </tbody>
+                    </table>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close_employed" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal record employed end-->
+
 
 
 
@@ -207,7 +258,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="tbodyEmployed">
                     </tbody>
                 </table>
             </div>
@@ -234,17 +285,15 @@
                 'searchName': $('#searchName').val(),
                 'searchLastName': $('#searchLastName').val(),
             }
-            console.log(data);
             $.ajax({
                 type: "GET",
                 url: "{{route('employed.load')}}",
                 data: data,
                 dataType: "json",
                 success: function(response){
-                    console.log(response);
-                    $('tbody').html("");
-
+                    $('.tbodyEmployed').html("");
                     $.each(response.employeds, function(key, item){
+                        
                         var accessButton = "";
                         
                         if(item.access){
@@ -252,13 +301,13 @@
                         }else{
                             accessButton = '<button type="button" value="'+item.employedID+'-'+item.access+'" class="access_employed btn btn-danger">Disabled <i class="fas fa-user-alt-slash"></i></button>';
                         }
-                        $('tbody').append('<tr>\
+                        $('.tbodyEmployed').append('<tr>\
                             <td>'+item.employedID+'</td>\
                             <td>'+item.department+'</td>\
                             <td>'+item.lastName+'</td>\
                             <td>'+item.middleName+'</td>\
                             <td>'+item.firstName+'</td>\
-                            <td>'+"na"+'</td>\
+                            <td>'+item.records+'</td>\
                             <td>'+"na"+'</td>\
                             <td><button type="button" value="'+item.employedID+'" class="edit_employed btn btn-primary"><i class="fas fa-edit"></i></button> <button type="button" value="'+item.employedID+'" class="delete_employed btn btn-danger"><i class="fas fa-trash-alt"></i></button> <button type="button" value="'+item.employedID+'" class="record_employed btn btn-warning"><i class="far fa-clipboard"></i></button> '+accessButton+' </td>\
                         </tr>'
@@ -288,8 +337,77 @@
 
         $(document).on('click','.record_employed', function (e) {
             e.preventDefault();
+            var empl_id = $(this).val();
+            $('#recordEmployedId').val(empl_id);
+            fetchemployedRecord();
+            $('#recordEmployedModal').modal('show');
+        });
 
-            
+
+
+
+        function fetchemployedRecord()
+        {
+            var data = {
+                'start': $('.start').val(),
+                'end': $('.end').val(),
+                'empl_id': $('#recordEmployedId').val(),
+            }
+            $.ajax({
+                type: "GET",
+                url: "{{route('employed.record')}}",
+                data: data,
+                dataType: "json",
+                success: function(response){
+                    $('.tbodyRecord').html("");
+                    if(response.status == 404){
+                        $('.fullName').text(response.employed.firstName+" "+response.employed.middleName+" "+response.employed.lastName);
+                        $('.tbodyRecord').append('<tr>\
+                                <td colspan="2">The employed has no records</td>\
+                                </tr>'
+                            );
+                    }else{
+                        $('.fullName').text(response.employed[0].firstName+" "+response.employed[0].middleName+" "+response.employed[0].lastName);
+                        $.each(response.employed, function(key, item){
+                            $('.tbodyRecord').append('<tr>\
+                                <td>'+item.date+'</td>\
+                                <td>'+item.hour+'</td>\
+                                </tr>'
+                            );
+
+                        });
+                        
+                    }
+                }
+
+            });
+        }
+
+        function download()
+        {
+            var data = {
+                'start': $('.start').val(),
+                'end': $('.end').val(),
+                'empl_id': $('#recordEmployedId').val(),
+            }
+            $.ajax({
+                type: "GET",
+                url: "{{route('employed.download')}}",
+                data: data,
+                dataType: "json",
+            });
+        }
+
+        $(document).on('click','.download', function () {
+            download()
+        });
+
+        $(document).on('change','.start', function () {
+            fetchemployedRecord()
+        });
+
+        $(document).on('change','.end', function () {
+            fetchemployedRecord()
         });
 
 
@@ -435,6 +553,7 @@
             $('#addEmployedModal').find('input').val("");
             $('#addEmployedModal').find('select').val(3);
             $('#editEmployedModal').find('input').val("");
+            $('#recordEmployedModal').find('input').val("");
 
 
         });

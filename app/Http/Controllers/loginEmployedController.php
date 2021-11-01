@@ -23,9 +23,15 @@ class loginEmployedController extends Controller
         $this->storeRecord($id);
 
         if(!empty($employed)){
-            return redirect()->route('employed.dashboard');
+            if($employed->access){
+                return redirect()->route('employed.dashboard');
+            }
+            else{
+                return back()->withErrors([
+                    'user' => 'Denied access.',
+                ]);
+            }
         }
-        
 
         return back()->withErrors([
             'user' => 'The provided credentials do not match our records.',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App;
 use App\Models\Employed;
+use App\Models\Record;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -42,6 +43,14 @@ class DashboardController extends Controller
                                                             ->orWhere('middleName','like',"$searchName%");
                                             })->get();
 
+        
+        // $employeds = DB::table('employeds')->join('records', 'employeds.employedID', '=', 'records.employedID')
+        //                                     ->select('employeds.*', 'records.*')
+        //                                     ->pluck('employedID');
+        // $matriz=array();
+        // $matriz=json_decode($employeds);
+        
+        // $resultado= array_count_values($matriz);
         
         
 
@@ -179,5 +188,79 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function filtersEmployedRecord(request $request)
+    {
+        $start = $request->input('start');
+        $end = $request->input('end');
+        $empl_id = $request->input('empl_id');
+
+        if(empty($start) && empty($end))
+        {
+            $employed = DB::table('employeds')
+                            ->join('records', 'employeds.employedID', '=', 'records.employedID')
+                            ->select('employeds.*', 'records.*')
+                            ->where('employeds.employedID','=',$empl_id)
+                            ->get();
+        }
+        elseif(!empty($start) && empty($end))
+        {
+            $employed = DB::table('employeds')
+                            ->join('records', 'employeds.employedID', '=', 'records.employedID')
+                            ->select('employeds.*', 'records.*')
+                            ->where('employeds.employedID','=',$empl_id)
+                            ->where('records.date','>=',$start)
+                            ->get();
+        }
+        elseif(empty($start) && !empty($end))
+        {
+            $employed = DB::table('employeds')
+                            ->join('records', 'employeds.employedID', '=', 'records.employedID')
+                            ->select('employeds.*', 'records.*')
+                            ->where('employeds.employedID','=',$empl_id)
+                            ->where('records.date','<=',$end)
+                            ->get();
+        }
+        else
+        {
+            $employed = DB::table('employeds')
+                            ->join('records', 'employeds.employedID', '=', 'records.employedID')
+                            ->select('employeds.*', 'records.*')
+                            ->where('employeds.employedID','=',$empl_id)
+                            ->whereBetween('records.date', [$start, $end])
+                            ->get();
+        }
+
+        return $employed;
+
+    }
+
+    public function fetchemployedRecord(request $request)
+    {
+        $employed = $this->filtersEmployedRecord($request);
+        $empl_id = $request->input('empl_id');
+        if(count($employed) > 0){
+            return response()->json([
+                'status' => 200,
+                'employed' => $employed,
+            ]);
+        }
+        else{
+            $employed = Employed::where('employedID','=',$empl_id)->first();
+            return response()->json([
+                'status' => 404,
+                'employed' => $employed,
+            ]);
+        }
+    }
+
+
+    public function download(request $request)
+    {
+        $employed = $this->filtersEmployedRecord($request);
+
+        $pdf = \PDF::loadView('pdf/tableRecords', compact('employed'));
+
+        return $pdf->download('archivo.pdf');
+    }
     
 }

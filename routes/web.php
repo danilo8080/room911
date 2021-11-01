@@ -41,3 +41,6 @@ Route::POST('/employedLogin','App\Http\Controllers\loginEmployedController@authe
 
 Route::get('/employedDashboard','App\Http\Controllers\EmployedController@dashboard')->name('employed.dashboard');
 
+Route::get('/record','App\Http\Controllers\DashboardController@fetchemployedRecord')->name('employed.record');
+
+Route::get('/download','App\Http\Controllers\DashboardController@download')->name('employed.download');
