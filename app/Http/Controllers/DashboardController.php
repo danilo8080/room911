@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\DB;
+use App\Imports\EmployedImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -19,8 +21,7 @@ class DashboardController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(){      
-
+    public function index(Request $request){      
         return view('index');
 
     }
@@ -42,21 +43,24 @@ class DashboardController extends Controller
                                                     $query->where('firstName','like',"$searchName%")
                                                             ->orWhere('middleName','like',"$searchName%");
                                             })->get();
-
-        
-        // $employeds = DB::table('employeds')->join('records', 'employeds.employedID', '=', 'records.employedID')
-        //                                     ->select('employeds.*', 'records.*')
-        //                                     ->pluck('employedID');
-        // $matriz=array();
-        // $matriz=json_decode($employeds);
-        
-        // $resultado= array_count_values($matriz);
         
         
 
         return response()->json([
             'employeds' => $employeds,
         ]);
+    }
+
+
+    public function import(Request $request)
+    {
+
+        $file = $request->file('file');
+        
+        Excel::import(new EmployedImport, $file);
+
+        return back()->with('message', 'success import');
+
     }
 
     public function store(Request $request){
@@ -84,7 +88,7 @@ class DashboardController extends Controller
             $employed->lastName = $request->input('lastName');
             $employed->middleName = $request->input('middleName');
             $employed->firstName = $request->input('firstName');
-            $employed->Access = $request->input('access');;
+            $employed->Access = $request->input('access');
             $employed->save();
             return response()->json([
                 'status' => 200,
@@ -188,11 +192,20 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function filtersEmployedRecord(request $request)
+    public function filtersEmployedRecord($request)
     {
-        $start = $request->input('start');
-        $end = $request->input('end');
-        $empl_id = $request->input('empl_id');
+        if($request->ajax()){
+            $start = $request->input('start');
+            $end = $request->input('end');
+            $empl_id = $request->input('empl_id');
+        }
+        else
+        {
+            $start = $request->start;
+            $end = $request->end;
+            $empl_id = $request->id;
+        }
+        
 
         if(empty($start) && empty($end))
         {
@@ -234,7 +247,7 @@ class DashboardController extends Controller
 
     }
 
-    public function fetchemployedRecord(request $request)
+    public function fetchemployedRecord(Request $request)
     {
         $employed = $this->filtersEmployedRecord($request);
         $empl_id = $request->input('empl_id');
@@ -258,9 +271,17 @@ class DashboardController extends Controller
     {
         $employed = $this->filtersEmployedRecord($request);
 
-        $pdf = \PDF::loadView('pdf/tableRecords', compact('employed'));
+        $pdf = \PDF::loadView('pdf.tableRecords', compact('employed'));
 
         return $pdf->download('archivo.pdf');
+        // $path = public_path('pdf/');
+        // $fileName =  'pdf';
+        // $pdf->save($path.'/'.$fileName);
+
+        // $pdf = public_path('pdf/'.$fileName);
+
+        // return response()->download($pdf);
+        
     }
     
 }

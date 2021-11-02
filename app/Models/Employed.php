@@ -13,6 +13,7 @@ class Employed extends Model
 
     protected $primaryKey = "employedID";
 
+    protected $fillable = ['employedID', 'department','lastName', 'middleName', 'firstName','access'];
 
     public function records()
     {

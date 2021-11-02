@@ -36,7 +36,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{route('user.index')}}">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-users-cog"></i>
                 </div>
@@ -48,7 +48,7 @@
 
             <!-- Nav Item - users -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.html">
+                <a type="button" class="employedView nav-link" href="{{route('user.index')}}">
                     <i class="fas fa-users"></i>
                     <span>Employeds</span></a>
             </li>
@@ -58,7 +58,7 @@
 
             <!-- Nav Item - admins -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.html">
+                <a type="button" class="adminView nav-link" href="{{route('user.admin')}}">
                     <i class="fas fa-user-lock"></i>
                     <span>Administrators</span></a>
             </li>
@@ -99,7 +99,7 @@
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="{{route('user.index')}}" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">Welcome {{Auth::user()->user}}</span>
                                 <img class="img-profile rounded-circle"
@@ -120,7 +120,6 @@
 
                 </nav>
                 <!-- End of Topbar -->
-
                 @yield('info')
             </div>
             <!-- End of Main Content -->
@@ -175,6 +174,8 @@
     <!-- Page level custom scripts -->
     <script src="js/demo/chart-area-demo.js"></script>
     <script src="js/demo/chart-pie-demo.js"></script>
+
+    
 
     @yield('scripts')
     

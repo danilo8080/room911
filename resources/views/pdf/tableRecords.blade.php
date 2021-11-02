@@ -12,15 +12,15 @@
         <table class="table table-bordered" id="employedsTable" width="100%" cellspacing="0">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Hour</th>
+                    <th >Date</th>
+                    <th >Hour</th>
                 </tr>
             </thead>
             <tbody class="tbodyRecord">
                 @foreach($employed as $key => $empl)
                     <tr>
-                        <td>{{$empl->date}}</td>
-                        <td>{{$empl->hour}}</td>
+                        <td style="text-align: center">{{$empl->date}}</td>
+                        <td style="text-align: center">{{$empl->hour}}</td>
                     </tr>
                 @endforeach
             </tbody>

@@ -43,4 +43,22 @@ Route::get('/employedDashboard','App\Http\Controllers\EmployedController@dashboa
 
 Route::get('/record','App\Http\Controllers\DashboardController@fetchemployedRecord')->name('employed.record');
 
-Route::get('/download','App\Http\Controllers\DashboardController@download')->name('employed.download');
+Route::post('/download','App\Http\Controllers\DashboardController@download')->name('employed.download');
+
+//admin
+
+Route::get('/adminIndex','App\Http\Controllers\AdminController@index')->name('user.admin');
+
+Route::get('/fetchadmin','App\Http\Controllers\AdminController@fetchadmin')->name('admin.load');
+
+Route::POST('/adminIndex','App\Http\Controllers\AdminController@store')->name('admin.add');
+
+Route::get('editAdmin/{id}','App\Http\Controllers\AdminController@edit')->name('admin.edit');
+
+Route::PUT('updateAdmin/{id}','App\Http\Controllers\AdminController@update')->name('admin.update');
+
+Route::DELETE('deleteAdmin/{id}','App\Http\Controllers\AdminController@delete')->name('admin.delete');
+
+//import
+
+Route::POST('/importEmployeds','App\Http\Controllers\DashboardController@import')->name('employed.import');

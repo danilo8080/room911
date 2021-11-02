@@ -163,23 +163,26 @@
             <div class="modal-body">
                 <h4 class="fullName"></h4>
                 <br>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label for="">From: </label>
-                            <input type="date" class="start">
-                        </div>
-                        <div class="form-group">
-                            <label for="">To: </label>
-                            <input type="date" class="end">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="button" class="download btn btn-danger"><i class="far fa-file-pdf"></i></button>
-                    </div>
+                <form action="{{route('employed.download')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" id="recordEmployedId" class="employedId form-control" name="id">
+                    <div class="row">
+                        <div class="col-md-8">
 
-                </div>
-                
+                            <div class="form-group">
+                                <label for="">From: </label>
+                                <input type="date" class="start" name="start">
+                            </div>
+                            <div class="form-group">
+                                <label for="">To: </label>
+                                <input type="date" class="end" name="end">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-danger" style="float: right; margin: 2px"><i class="far fa-file-pdf"></i></button>
+                        </div>
+                    </div>
+                </form>
                 <div class="table-responsive">
                     <table class="table table-bordered" id="employedsTable" width="100%" cellspacing="0">
                         <thead>
@@ -203,10 +206,36 @@
 <!-- Modal record employed end-->
 
 
+<!-- Modal import employed-->
+<div class="modal fade" id="importEmployedModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Import employeds</h5>
+                <button type="button" class="btn-close close_employed" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <input type="hidden" id="recordEmployedId" class="employedId form-control">
+            <div class="modal-body">
+                <form action="{{route('employed.import')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <input type="file" name="file">
+
+                    <button class="send"></button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="save btn btn-success">Save <i class="far fa-save"></i></button>
+                <button type="button" class="btn btn-secondary close_employed" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal import employed end-->
+
+
 
 
 <div class="container-fluid">
-    <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary" ALIGN="center">Access Control ROOM_911 </h6>
@@ -240,7 +269,9 @@
                 </div>
                 <div class="col-md-4">
                     <br>
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#addEmployedModal" style="float: right" class="btn btn-success">ADD <i class="fas fa-user-plus"></i></a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#importEmployedModal" style="float: right; margin: 2px" class="btn btn-success">Import <i class="fas fa-file-upload"></i> </a>
+                    
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#addEmployedModal" style="float: right; margin: 2px" class="btn btn-success"> ADD <i class="fas fa-user-plus"></i> </a>
                 </div>
             </div>
             <br>
@@ -319,6 +350,13 @@
             });
         }
 
+        $('.send').hide();
+        $(document).on('click','.save', function (e) {
+            e.preventDefault();
+            $('.send').click();
+            $('#importEmployedModal').modal('hide');
+        });
+
         $(document).on('change', '.searchID', function () {
             fetchemployed();
         });
@@ -338,7 +376,8 @@
         $(document).on('click','.record_employed', function (e) {
             e.preventDefault();
             var empl_id = $(this).val();
-            $('#recordEmployedId').val(empl_id);
+            //$('#recordEmployedId').val(empl_id);
+            $('.employedId').val(empl_id);
             fetchemployedRecord();
             $('#recordEmployedModal').modal('show');
         });
@@ -390,11 +429,21 @@
                 'end': $('.end').val(),
                 'empl_id': $('#recordEmployedId').val(),
             }
+            
             $.ajax({
                 type: "GET",
                 url: "{{route('employed.download')}}",
                 data: data,
-                dataType: "json",
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(response){
+                    var blob = new Blob([response]);
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = "Sample.pdf";
+                    link.click();
+                }
             });
         }
 
@@ -617,11 +666,6 @@
 
 
 
-        $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
 
 
         $(document).on('click','.delete_employed_confirm',function(e){
@@ -629,6 +673,11 @@
 
             var empl_id = $('#deleteEmployedId').val();
 
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
             $.ajax({
                 type: "DELETE",
                 url: "/deleteEmployed/"+empl_id,
@@ -651,6 +700,10 @@
 
             fetchemployed();
         });
+
+
+        
+
 
     });
 
