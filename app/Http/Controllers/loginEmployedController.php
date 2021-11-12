@@ -39,11 +39,23 @@ class loginEmployedController extends Controller
     }
 
     public function storeRecord($id){
+        $employed = Employed::where('employedID',$id)->first();
 
-        $record = new Record;
-        $record->employedID = $id;
-        $record->hour = date(' H:i:s');
-        $record->date = date('Y-m-d');
-        $record->save();
+        if($employed){
+            $record = new Record;
+            $record->employedID = $id;
+            $record->hour = date(' H:i:s');
+            $record->date = date('Y-m-d');
+            $record->access = $employed->access;
+            $record->save();
+        }
+        else{
+            $record = new Record;
+            $record->employedID = $id;
+            $record->hour = date(' H:i:s');
+            $record->date = date('Y-m-d');
+            $record->access = 0;
+            $record->save();
+        }
     }
 }

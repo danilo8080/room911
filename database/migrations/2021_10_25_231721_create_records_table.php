@@ -18,6 +18,7 @@ class CreateRecordsTable extends Migration
             $table->bigInteger('employedID');
             $table->string('hour');
             $table->date('date');
+            $table->boolean('access');
             $table->timestamps();
         });
     }

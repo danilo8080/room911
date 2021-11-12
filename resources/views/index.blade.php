@@ -189,6 +189,7 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Hour</th>
+                                <th>Access</th>
                             </tr>
                         </thead>
                         <tbody class="tbodyRecord">
@@ -322,11 +323,12 @@
                 data: data,
                 dataType: "json",
                 success: function(response){
+                    console.log(response.employeds);
+
                     $('.tbodyEmployed').html("");
                     $.each(response.employeds, function(key, item){
                         
                         var accessButton = "";
-                        
                         if(item.access){
                             accessButton = '<button type="button" value="'+item.employedID+'-'+item.access+'" class="access_employed btn btn-success">Enabled <i class="fas fa-user"></i></button>';
                         }else{
@@ -338,8 +340,8 @@
                             <td>'+item.lastName+'</td>\
                             <td>'+item.middleName+'</td>\
                             <td>'+item.firstName+'</td>\
-                            <td>'+item.records+'</td>\
-                            <td>'+"na"+'</td>\
+                            <td>'+item.lastAccess+'</td>\
+                            <td>'+item.totalAccess+'</td>\
                             <td><button type="button" value="'+item.employedID+'" class="edit_employed btn btn-primary"><i class="fas fa-edit"></i></button> <button type="button" value="'+item.employedID+'" class="delete_employed btn btn-danger"><i class="fas fa-trash-alt"></i></button> <button type="button" value="'+item.employedID+'" class="record_employed btn btn-warning"><i class="far fa-clipboard"></i></button> '+accessButton+' </td>\
                         </tr>'
                         );
@@ -408,9 +410,15 @@
                     }else{
                         $('.fullName').text(response.employed[0].firstName+" "+response.employed[0].middleName+" "+response.employed[0].lastName);
                         $.each(response.employed, function(key, item){
+                            if(item.access){
+                                var access = 'success';
+                            }else{
+                                var access = 'denied';
+                            }
                             $('.tbodyRecord').append('<tr>\
                                 <td>'+item.date+'</td>\
                                 <td>'+item.hour+'</td>\
+                                <td>'+access+'</td>\
                                 </tr>'
                             );
 
@@ -429,6 +437,12 @@
                 'end': $('.end').val(),
                 'empl_id': $('#recordEmployedId').val(),
             }
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
             
             $.ajax({
                 type: "GET",
@@ -447,7 +461,8 @@
             });
         }
 
-        $(document).on('click','.download', function () {
+        $(document).on('click','.download', function (e) {
+            e.preventDefault();
             download()
         });
 

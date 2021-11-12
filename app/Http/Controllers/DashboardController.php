@@ -21,7 +21,8 @@ class DashboardController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(Request $request){      
+    public function index(){
+
         return view('index');
 
     }
@@ -33,7 +34,7 @@ class DashboardController extends Controller
         $searchLastName = $request->input('searchLastName');
         
         
-        $employeds = DB::table('employeds')->where('deleted_at',null)
+        $employeds = Employed::where('deleted_at',null)
                                             ->where('employedID','like',"$searchID%")
                                             ->where('lastName','like',"$searchLastName%")
                                             ->when($searchDepartment, function ($query, $searchDepartment) {
@@ -44,7 +45,13 @@ class DashboardController extends Controller
                                                             ->orWhere('middleName','like',"$searchName%");
                                             })->get();
         
-        
+
+
+        $employeds->each(function ($item, $key) {
+            $item->totalAccess = $item->records()->count();
+            $item->lastAccess = $item->records()->max('date');
+        });
+
 
         return response()->json([
             'employeds' => $employeds,
@@ -271,16 +278,11 @@ class DashboardController extends Controller
     {
         $employed = $this->filtersEmployedRecord($request);
 
+        //return $employed;
+
         $pdf = \PDF::loadView('pdf.tableRecords', compact('employed'));
 
         return $pdf->download('archivo.pdf');
-        // $path = public_path('pdf/');
-        // $fileName =  'pdf';
-        // $pdf->save($path.'/'.$fileName);
-
-        // $pdf = public_path('pdf/'.$fileName);
-
-        // return response()->download($pdf);
         
     }
     
